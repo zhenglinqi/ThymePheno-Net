@@ -9,26 +9,26 @@ class ThymeDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
 
-        # 定义类别名称和索引的映射
+
         self.stage_mapping = {
-            'stage1_returning': 0,  # 返青期
-            'stage2_initial_flowering': 1,  # 始花期
-            'stage3_full_flowering': 2,  # 盛花期
-            'stage4_fruiting': 3  # 结实期
+            'stage1_returning': 0, 
+            'stage2_initial_flowering': 1,  
+            'stage3_full_flowering': 2, 
+            'stage4_fruiting': 3 
         }
 
         self.classes = list(self.stage_mapping.keys())
 
-        # 收集所有图像路径和标签
+ 
         self.images = []
         self.labels = []
 
-        # 打印类别映射
+
         print("\n类别映射关系：")
         for stage_name, idx in self.stage_mapping.items():
             print(f"{stage_name}: {idx}")
 
-        # 遍历所有文件夹收集图像
+
         for stage_name, label in self.stage_mapping.items():
             stage_dir = os.path.join(root_dir, stage_name)
             if os.path.isdir(stage_dir):
@@ -39,7 +39,7 @@ class ThymeDataset(Dataset):
                             self.images.append(img_path)
                             self.labels.append(label)
 
-        # 打印每个类别的样本数量
+
         print("\n各类别样本数量：")
         label_counts = {}
         for label in self.labels:
@@ -49,7 +49,7 @@ class ThymeDataset(Dataset):
         for stage_name, count in label_counts.items():
             print(f"{stage_name}: {count} 个样本")
 
-        # 设置图像转换
+
         if transform is None:
             self.transform = transforms.Compose([
                 transforms.Resize((224, 224)),
@@ -70,12 +70,11 @@ class ThymeDataset(Dataset):
         label = self.labels[idx]
 
         try:
-            # 读取并转换图像
+
             image = Image.open(img_path).convert('RGB')
             if self.transform:
                 image = self.transform(image)
 
-            # 验证数据
             if not torch.is_tensor(image):
                 raise ValueError(f"图像转换失败: {img_path}")
             if image.shape != (3, 224, 224):
@@ -85,14 +84,14 @@ class ThymeDataset(Dataset):
 
         except Exception as e:
             print(f"处理图像出错 {img_path}: {str(e)}")
-            # 返回一个替代样本
+ 
             return self.__getitem__((idx + 1) % len(self))
 
     def get_class_names(self):
         return self.classes
 
     def get_class_counts(self):
-        """返回每个类别的样本数量"""
+
         counts = {}
         for label in self.labels:
             stage_name = self.classes[label]
